@@ -17,13 +17,12 @@ public class CharacterSO : ScriptableObject
 
     public readonly List<int> Anim_NormalAttacks = new List<int> {
             Animator.StringToHash("Anim_AttackOne"),
-            Animator.StringToHash("Anim_AttackTwo")
+            Animator.StringToHash("Anim_AttackTwo"),
+            Animator.StringToHash("Anim_AttackThree")
     };
 
-    public readonly List<int> Anim_StrongAttacks = new List<int> {
-            Animator.StringToHash("Anim_AttackThree"),
-            Animator.StringToHash("Anim_AttackFour")
-    };
+    public readonly int Anim_StrongAttacks = Animator.StringToHash("Anim_AttackFour");
+            //Animator.StringToHash("Anim_AttackThree"),
 
     public readonly int Anim_Pain = Animator.StringToHash("Anim_Pain");
     public readonly int Anim_Death = Animator.StringToHash("Anim_Death");

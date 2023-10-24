@@ -25,9 +25,4 @@ public class CharacterHealthComponent : CharacterAbstract
         Debug.Log("TakePoinDamage");
     }
 
-    public float GetHealthPercen()
-    {
-        return this._fHealth / this._fMaxHealth;
-    }
-
 }

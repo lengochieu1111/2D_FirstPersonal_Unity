@@ -32,8 +32,6 @@ public class CharacterMovementComponent : CharacterAbstract
     {
         if (this._moveVector.x == 0) return;
 
-        this.UpdateMovementSpeed();
-
         this.AccelerationProcess();
 
         this.Movement();
@@ -99,12 +97,9 @@ public class CharacterMovementComponent : CharacterAbstract
             this._fJumpHeight = this._fDefaultJumpHeight;
     }
 
-    private void UpdateMovementSpeed()
+    public void ChangeMovementSpeed(float movvementSpeed)
     {
-        if (this.baseCharacter.CharacterMesh.BIsAttacking == true)
-            this._fMovementSpeed = this._fCombatSpeed;
-        else
-            this._fMovementSpeed = this._fDefaultSpeed;
+            this._fMovementSpeed = movvementSpeed;
     }
 
     private void Jump()

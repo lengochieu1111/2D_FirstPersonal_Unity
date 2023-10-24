@@ -185,6 +185,7 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
 
         this._characterMesh.BIsAttacking = true;
         this._characterAttack.RequestAttack();
+        SoundSpawner.Instance.PlayAudio(this._characterSO.WeaponTrailAudio);
     }
 
         #endregion
@@ -196,7 +197,7 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
         this._characterMesh.RequestUpdateState(iStateAttack);
     }
 
-    public void I_AE_AttackEnd()
+    public virtual void I_AttackEnd()
     {
         this._characterMesh.BIsAttacking = false;
         this._characterAttack.IAttackIndex = 0;
@@ -211,23 +212,24 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
             this._characterMesh.RequestUpdateState(this._characterSO.Anim_Idle);
     }
 
-    public void I_AE_AttackCombo()
+    public virtual void I_AtackCombo()
     {
         if (this._characterAttack.BSavedAttack == true)
         {
             this._characterAttack.NextAttack();
             this._characterAttack.RequestAttack();
+            SoundSpawner.Instance.PlayAudio(this._characterSO.WeaponTrailAudio);
             this._characterAttack.BSavedAttack = false;
         }
 
     }
 
-    public void I_AE_TraceStart()
+    public void I_TraceStart()
     {
         this._characterAttack?.TraceStart();
     }
 
-    public void I_AE_TraceEnd()
+    public void I_TraceEnd()
     {
         this._characterAttack?.TraceEnd();
     }
@@ -249,6 +251,8 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
 
     protected virtual void HandleTakePoinDamage(BaseCharacter characterCauses, float fDamage)
     {
+        if (this._characterMesh.BIsDead == true) return;
+
         this._characterHealth?.UpdateHealthByDamage(fDamage);
 
         if (this._characterHealth?.FHealth <= 0.0f)
@@ -269,8 +273,10 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
         SoundSpawner.Instance.PlayAudio(this._characterSO.DeathAudio);
     }
 
-    public void HandleDeadEnd()
+    public virtual void HandleDeadEnd()
     {
+        this.attackInterface_Target?.I_HandleTargetDestroyed();
+        this._characterMesh.BIsDead = false;
         this.gameObject.SetActive(false);
     }
 
@@ -288,6 +294,7 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
     public void HandlePainEnd()
     {
         this._characterMesh.BIsPaining = false;
+        this._characterMesh.BIsAttacking = false;
 
         if (this._characterMovement.BPressingMove == true)
             this._characterMesh.RequestUpdateState(this._characterSO.Anim_Run);
@@ -299,10 +306,21 @@ public class BaseCharacter : RyoMonoBehaviour, IAttackInterface
     public virtual void I_EnterCombat(BaseCharacter character)
     {
         this.attackInterface_Target = character.GetComponent<IAttackInterface>();
+
+        this._characterMovement.ChangeMovementSpeed(this._characterSO.FCombatSpeed);
     }
 
-    public virtual void I_HitTarget(float Health_Target, float MaxHealth_Target) { }
+    public virtual void I_ExitCombat()
+    {
+        this._characterMovement.ChangeMovementSpeed(this._characterSO.FDefaultSpeed);
+    }
 
+    public virtual void I_HitTarget(float Health_Target, float MaxHealth_Target) {}
+
+    public virtual void I_HandleTargetDestroyed() 
+    {
+        this.I_ExitCombat();
+    }
 
 
     #endregion

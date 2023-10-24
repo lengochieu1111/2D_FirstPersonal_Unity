@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 88db62c3a2f9d114f80a3f6e45af5341, type: 3}
+  m_Name: Enemy_Skeleton
+  m_EditorClassIdentifier: 
+  FDefaultSpeed: 8
+  FCombatSpeed: 6
+  FDefaultJumpHeight: 40
+  FAttackJumpHeight: 35
+  FDamage: 20
+  FHealth: 100
+  FMaxHealth: 100
+  FSightRadius: 7
+  PainAudio: {fileID: 8300000, guid: d9d5a13745ef88b439002b6d603abee9, type: 3}
+  DeathAudio: {fileID: 8300000, guid: d19373d368c29a74da5c8dc32b059eae, type: 3}
+  WeaponTrailAudio: {fileID: 8300000, guid: e4e719215600c514899434787ff3f0a3, type: 3}
+  WeaponHitAudio: {fileID: 8300000, guid: 0508cf6fc7ef16d4db1697f54e75c247, type: 3}

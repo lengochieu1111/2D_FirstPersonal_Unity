@@ -16,8 +16,10 @@ public class EnemyAIController : CharacterController
     [SerializeField] private List<Transform> _patrolPoints;
     [SerializeField] private int _patrolIndex;
 
-    [Header("Patrol State")]
+    [Header("Combat State")]
     [SerializeField] private BaseCharacter _playerCharacter;
+    [SerializeField] private float _fCoolDownTime = 0.2f;
+    [SerializeField] private float _fCounter;
 
     public EAIState AIState => _AIState;
 
@@ -43,7 +45,6 @@ public class EnemyAIController : CharacterController
     protected override void Start()
     {
         base.Start();
-
         this.MoveToTarget();
     }
 
@@ -72,13 +73,6 @@ public class EnemyAIController : CharacterController
 
         return true;
     }
-
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.color = Color.yellow;
-
-    //    Gizmos.DrawWireSphere(this.transform.position, this._fSightRadius);
-    //}
 
     private void Patrol()
     {
@@ -150,7 +144,29 @@ public class EnemyAIController : CharacterController
             this.MoveToTarget();
         }
         else
+        {
+            if (this._fCounter > 0)
+            {
+                this._fCounter -= Time.deltaTime;
+                return;
+            }
+
+            this.moveInput = Vector2.zero;
+            this.HandleMoveInput();
+
             this.baseCharacter.HandlePressedAttack(EAttackType.Normal);
+        }
+    }
+
+    public void AttackCoolDown()
+    {
+        this._fCounter = this._fCoolDownTime;
+    }
+
+    public void BackToPatrol()
+    {
+        this._AIState = EAIState.Patrol;
+        this._playerCharacter = null;
     }
 
 }

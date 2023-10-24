@@ -2044,28 +2044,28 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.4
-    functionName: TraceStart_AnimEvent
+    functionName: AE_TraceStart
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 0.5833333
-    functionName: TraceEnd_AnimEvent
+    functionName: AE_TraceEnd
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 0.75
-    functionName: AttackCombo_AnimEvent
+    functionName: AE_AttackCombo
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 0.8833333
-    functionName: AttackEnd_AnimEvent
+    functionName: AE_AttackEnd
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

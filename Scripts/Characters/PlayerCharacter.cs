@@ -40,6 +40,12 @@ public class PlayerCharacter : BaseCharacter
         FirstHUD.Intance.PlayerWidget.UpdateHealthBar_Enemy(Health_Target, MaxHealth_Target);
     }
 
+    public override void I_ExitCombat()
+    {
+        base.I_ExitCombat();
+
+        FirstHUD.Intance.PlayerWidget.SetActiveHealthBar_Enemy(false);
+    }
 
 
 }

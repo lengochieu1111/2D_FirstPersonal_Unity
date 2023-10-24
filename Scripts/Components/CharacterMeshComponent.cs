@@ -67,25 +67,30 @@ public class CharacterMeshComponent : CharacterAbstract
 
         #region Call the function in animation event attack
 
-    private void AttackCombo_AnimEvent()
+    private void AE_AttackCombo()
     {
-        this.baseCharacter?.I_AE_AttackCombo();
+        this.baseCharacter?.I_AtackCombo();
     }
 
-    private void AttackEnd_AnimEvent()
+    private void AE_AttackEnd()
     {
-        this.baseCharacter?.I_AE_AttackEnd();
+        this.baseCharacter?.I_AttackEnd();
     }
     
-    private void TraceStart_AnimEvent()
+    private void AE_TraceStart()
     {
-        this.baseCharacter?.I_AE_TraceStart();
+        this.baseCharacter?.I_TraceStart();
     }
 
-    private void TraceEnd_AnimEvent()
+    private void AE_TraceEnd()
     {
-        this.baseCharacter?.I_AE_TraceEnd();
+        this.baseCharacter?.I_TraceEnd();
+    }
+    
+    private void AE_PainEnd()
+    {
+        this.baseCharacter?.HandlePainEnd();
     }
 
-        #endregion
+    #endregion
 }

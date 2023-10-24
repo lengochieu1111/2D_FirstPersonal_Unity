@@ -35,11 +35,6 @@ public class CharacterAttackComponent : CharacterAbstract
 
     public void RequestAttack()
     {
-        if (this._requestAttackType == EAttackType.Normal)
-            this.Anim_Attacks = this.baseCharacter.CharacterSO.Anim_NormalAttacks;
-        else
-            this.Anim_Attacks = this.baseCharacter.CharacterSO.Anim_StrongAttacks;
-
         this.Attack();
     }
 
@@ -47,14 +42,10 @@ public class CharacterAttackComponent : CharacterAbstract
     {
         this._processedResults.Clear();
 
-        //if (this._requestAttackType == EAttackType.Normal && this._iAttackIndex == 1)
-        //    this.baseCharacter.CharacterMovement.RequestJump();
-        //else if (this._requestAttackType == EAttackType.Strong && this._iAttackIndex == 0)
-        //    this.baseCharacter.CharacterMovement.RequestJump();
-
-        SoundSpawner.Instance.PlayAudio(this.baseCharacter.CharacterSO.WeaponTrailAudio);
-
-        this.baseCharacter.I_PlayAttackAnim(this.Anim_Attacks[this._iAttackIndex]);
+        if (this._requestAttackType == EAttackType.Strong)
+            this.baseCharacter.I_PlayAttackAnim(this.baseCharacter.CharacterSO.Anim_StrongAttacks);
+        else
+            this.baseCharacter.I_PlayAttackAnim(this.Anim_Attacks[this._iAttackIndex]);
     }
 
     public void NextAttack()
