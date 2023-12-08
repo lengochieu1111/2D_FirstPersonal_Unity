@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,9 @@ public class PlayerController : CharacterController
 {
     [Header("Player Input")]
     private DefaultInput _playerInput;
+
+    [SerializeField] private bool _bSprintInput;
+   public bool bSprintInput => _bSprintInput;
 
     protected override void Awake()
     {
@@ -22,10 +26,13 @@ public class PlayerController : CharacterController
 
         this._playerInput.Enable();
 
-        this._playerInput.PlayerInput.Move.performed += OnMovePerformed;
-        this._playerInput.PlayerInput.Move.canceled += OnMoveCanceled;
+        this._playerInput.PlayerInput.Walk.performed += OnMovePerformed;
+        this._playerInput.PlayerInput.Walk.canceled += OnMoveCanceled;
 
         this._playerInput.PlayerInput.Jump.started += OnJumpStarted;
+
+        this._playerInput.PlayerInput.Run.performed += OnSprintPerformed;
+        this._playerInput.PlayerInput.Run.canceled += OnSprintCanceled;
 
         this._playerInput.PlayerInput.NormalAttack.started += OnNormalAttackStarted;
         this._playerInput.PlayerInput.StrongAttack.started += OnStrongAttackStarted;
@@ -37,10 +44,13 @@ public class PlayerController : CharacterController
         base.OnDisable();
 
         this._playerInput.Disable();
-        this._playerInput.PlayerInput.Move.performed -= OnMovePerformed;
-        this._playerInput.PlayerInput.Move.canceled -= OnMoveCanceled;
+        this._playerInput.PlayerInput.Walk.performed -= OnMovePerformed;
+        this._playerInput.PlayerInput.Walk.canceled -= OnMoveCanceled;
 
         this._playerInput.PlayerInput.Jump.started -= OnJumpStarted;
+
+        this._playerInput.PlayerInput.Run.performed -= OnSprintPerformed;
+        this._playerInput.PlayerInput.Run.canceled -= OnSprintCanceled;
 
         this._playerInput.PlayerInput.NormalAttack.started -= OnNormalAttackStarted;
         this._playerInput.PlayerInput.StrongAttack.started -= OnStrongAttackStarted;
@@ -50,29 +60,41 @@ public class PlayerController : CharacterController
 
     private void OnMovePerformed(InputAction.CallbackContext value)
     {
-        this.moveInput = value.ReadValue<Vector2>();
-        this.HandleMoveInput();
+        this.inputValueMove = value.ReadValue<Vector2>().x;
+        this.PressMove();
     }
 
     private void OnMoveCanceled(InputAction.CallbackContext value)
     {
-        this.moveInput = Vector2.zero;
-        this.HandleMoveInput();
+        this.inputValueMove = 0;
+        this.ReleaseMove();
+    }
+
+    private void OnSprintPerformed(InputAction.CallbackContext value)
+    {
+        this._bSprintInput = true;
+        this.PressSprint();
+    }
+
+    private void OnSprintCanceled(InputAction.CallbackContext value)
+    {
+        this._bSprintInput = false;
+        this.ReleaseSprint();
     }
 
     private void OnJumpStarted(InputAction.CallbackContext value)
     {
-        this.HandleJumpInput();
+        this.PressJump();
     }
 
     private void OnNormalAttackStarted(InputAction.CallbackContext value)
     {
-        this.HandleNormalAttackInput();
+        this.PressNormalAttack();
     }
 
     private void OnStrongAttackStarted(InputAction.CallbackContext value)
     {
-        this.HandleStrongAttackInput();
+        this.PressStrongAttack();
     }
 
     #endregion

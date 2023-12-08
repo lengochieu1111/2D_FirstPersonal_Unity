@@ -1,19 +1,20 @@
+using MVCS.Architecture.BaseCharacter;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class FallingEvent_Anim : StateMachineBehaviour
 {
-    private BaseCharacter _character;
+    private BaseCharacterView _characterView;
 
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        this._character = animator.gameObject.GetComponentInParent<BaseCharacter>();
+        this._characterView = animator.gameObject.GetComponent<BaseCharacterView>();
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        this._character?.HandleFalling();
+        this._characterView?.EA_FallingToLanding();
     }
 
     /*  

@@ -17,9 +17,9 @@ public class EnemyAIController : CharacterController
     [SerializeField] private int _patrolIndex;
 
     [Header("Combat State")]
-    [SerializeField] private BaseCharacter _playerCharacter;
-    [SerializeField] private float _fCoolDownTime = 0.2f;
-    [SerializeField] private float _fCounter;
+    [SerializeField] private BaseCharacter_Old _playerCharacter;
+    [SerializeField] private float _fCoolDownTime = 0.8f;
+    private float _fCounter;
 
     public EAIState AIState => _AIState;
 
@@ -38,7 +38,7 @@ public class EnemyAIController : CharacterController
         this._patrolIndex = 0;
         this._targetLocation = this._patrolPoints[0];
 
-        this._fSightRadius = this.baseCharacter.CharacterSO.FSightRadius;
+        this._fSightRadius = this.baseCharacter.CharacterSO.SightRadius;
         this._targetLayer = this.baseCharacter.CharacterAttack.TracerLayer;
     }
 
@@ -66,7 +66,7 @@ public class EnemyAIController : CharacterController
         RaycastHit2D hit = Physics2D.CircleCast(this.transform.position, this._fSightRadius, Vector2.left, 0, this._targetLayer);
 
         if (hit.collider == null) return false;
-        this._playerCharacter = hit.collider.GetComponentInParent<BaseCharacter>();
+        this._playerCharacter = hit.collider.GetComponentInParent<BaseCharacter_Old>();
 
         if (this._playerCharacter == null) return false;
         this._targetLocation = this._playerCharacter?.transform;
@@ -82,16 +82,18 @@ public class EnemyAIController : CharacterController
             this._targetLocation = this._patrolPoints[this._patrolIndex];
             this.MoveToTarget();
         }
+        else
+            this.baseCharacter.CharacterMovement.ChangeMaxMovementSpeed(this.baseCharacter.CharacterSO.PatrolSpeed);
 
         if (this.PlayerInSight())
         {
             this._AIState = EAIState.Combat;
-            this._targetLocation = this._playerCharacter?.transform;
+            //this._targetLocation = this._playerCharacter?.transform;
             this.MoveToTarget();
             this._enemyCharacter?.I_HandleSeePlayer(this._playerCharacter);
         }
     }
-    
+
     private void Combat()
     {
         if (this.ArrivedTheTargetLocation() == true)
@@ -107,35 +109,31 @@ public class EnemyAIController : CharacterController
 
         if (distanceToPlayer <= this._fTargetDistance)
         {
-            this.moveInput = Vector2.zero;
-            this.HandleMoveInput();
+            this.inputValueMove = 0;
+            this.ReleaseMove();
         }
 
         return distanceToPlayer <= this._fTargetDistance;
     }
 
-    private void MoveToTarget()
+    public void MoveToTarget()
     {
-        if (this.transform.position.x < this._targetLocation.position.x && this.moveInput == Vector2.right) return;
-        if (this.transform.position.x > this._targetLocation.position.x && this.moveInput == Vector2.left) return;
-
+        if (this.transform.position.x < this._targetLocation.position.x && this.inputValueMove == 1) return;
+        if (this.transform.position.x > this._targetLocation.position.x && this.inputValueMove == -1) return;
+        
         if (this.transform.position.x < this._targetLocation.position.x)
-        {            
-            this.moveInput = Vector2.right;
-            this.HandleMoveInput();
-        }
+            this.inputValueMove = 1;
         else
-        {
-            this.moveInput = Vector2.left;
-            this.HandleMoveInput();
-        }
+            this.inputValueMove = -1;
+
+        this.PressMove();
     }
 
     private void Regen()
     {
 
     }
-    
+
     private void Attack()
     {
         if (this.ArrivedTheTargetLocation() == false)
@@ -146,15 +144,13 @@ public class EnemyAIController : CharacterController
         else
         {
             if (this._fCounter > 0)
-            {
                 this._fCounter -= Time.deltaTime;
-                return;
+            else
+            {
+                this.inputValueMove = 0;
+                this.ReleaseMove();
+                this.PressNormalAttack();
             }
-
-            this.moveInput = Vector2.zero;
-            this.HandleMoveInput();
-
-            this.baseCharacter.HandlePressedAttack(EAttackType.Normal);
         }
     }
 

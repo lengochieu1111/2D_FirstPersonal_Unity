@@ -1,20 +1,19 @@
+using System.Collections;
+using UnityEditor.PackageManager.Requests;
 using UnityEngine;
 
 public class CharacterMeshComponent : CharacterAbstract
 {
     [SerializeField] private Animator _animator;
-    [SerializeField] private bool _bIsJumping;
-    [SerializeField] private bool _bIsAttacking;
-    [SerializeField] private bool _bIsPaining;
-    [SerializeField] private bool _bIsDead;
+    [SerializeField] private IAttackInterface _attackInterface;
+    [SerializeField] public bool bCanAttackToRun;
     private bool _bFlipLeft;
     private int _iAnimState;
-    public bool BIsJumping { set => _bIsJumping = value;  get => _bIsJumping; }
-    public bool BIsAttacking { set => _bIsAttacking = value;  get => _bIsAttacking; }
-    public bool BIsPaining { set => _bIsPaining = value;  get => _bIsPaining; }
-    public bool BIsDead { set => _bIsDead = value;  get => _bIsDead; }
+
+    private Coroutine croutine;
 
     public Animator Animator => _animator;
+    public bool bFlipLeft => _bFlipLeft;
 
     protected override void LoadComponents()
     {
@@ -22,40 +21,103 @@ public class CharacterMeshComponent : CharacterAbstract
 
         if (this._animator == null)
             this._animator = GetComponent<Animator>();
+
+        if (this._attackInterface == null)
+            this._attackInterface = GetComponentInParent<IAttackInterface>();
     }
 
     protected override void SetupValues()
     {
         base.SetupValues();
-        this._bIsJumping = false;
-        this._bIsAttacking = false;
-        this._bIsDead = false;
-        this._bIsPaining = false;
         this._bFlipLeft = false;
+        this.bCanAttackToRun = false;
         this._iAnimState = this.baseCharacter.CharacterSO.Anim_Idle;
     }
 
-    public void RequestUpdateState(int iState)
+    public void RequestIdleUpdate()
     {
-        if (this._iAnimState == iState) return;
-        this._iAnimState = iState;
-        this.UpdateState(); 
+        this._animator.SetBool("bIsMoving", false);
     }
 
-    private void UpdateState()
+    public void RequestMigrationUpdate(float moveValue)
     {
-        this._animator.CrossFade(this._iAnimState, 0, 0);
+        this._animator.SetBool("bIsMoving", true);
+
     }
 
-    public void RequestFlip(float fAngle)
+    public void RequestJumpUpdate()
     {
+        this._animator.SetTrigger("bIsJumping");
+        this._animator.SetBool("bIsFalling", true);
+    }
+
+    public void RequestAttackUpdate(int iAttackState)
+    {
+        this.RequestUpdateState(iAttackState);
+    }
+
+    public void RequestAttackToRun()
+    {
+        this.RequestUpdateState(this.baseCharacter.CharacterSO.Anim_Run);
+    }
+
+    public void RequestDeathUpdate()
+    {
+        this.RequestUpdateState(this.baseCharacter.CharacterSO.Anim_Death);
+    }
+
+    public void RequestPainUpdate()
+    {
+        this.RequestUpdateState(this.baseCharacter.CharacterSO.Anim_Pain);
+    }
+
+    public void AN_Rising()
+    {
+        this._animator.SetFloat("yVelocity", this.baseCharacter.Rigidbody.velocity.y);
+    }
+    
+    public void AN_Falling()
+    {
+        if (this.baseCharacter.CharacterCapsule.bIsFalling)
+            this._animator.SetBool("bIsFalling", true);
+        else
+            this._animator.SetBool("bIsFalling", false);
+    }
+
+    public void AN_FromGroundToFalling()
+    {
+        bool bFromGroundToFalling = this.baseCharacter.CharacterCapsule.bIsFalling
+            && !this.baseCharacter.CharacterMovement.bIsJumping;
+
+        if (bFromGroundToFalling)
+            this._animator.SetBool("bIsFalling", true);
+    }
+
+    public void AN_RunAttackEndToRun(float moveVector)
+    {
+        if (moveVector != 0)
+        {
+            this.RequestFlipMesh(moveVector);
+            this.RequestUpdateState(this.baseCharacter.CharacterSO.Anim_Run);
+        }
+    }
+
+    public void RequestFlipMesh(float moveValue)
+    {
+        float fAngle = 0;
+        if (moveValue > 0)
+            fAngle = 0;
+        else if (moveValue < 0)
+            fAngle = -180;
+
         bool bCanFlip = (this._bFlipLeft == true && fAngle == 0)
             || (this._bFlipLeft == false && fAngle == -180);
 
-        if (bCanFlip == false) return;
-
-        this.FlipMesh(fAngle);
-        this._bFlipLeft = !this._bFlipLeft;
+        if (bCanFlip)
+        {
+            this.FlipMesh(fAngle);
+            this._bFlipLeft = !this._bFlipLeft;
+        }
     }
 
     private void FlipMesh(float fAngle)
@@ -64,33 +126,56 @@ public class CharacterMeshComponent : CharacterAbstract
         this.transform.rotation = Quaternion.Euler(rotator);
     }
 
+    private void RequestUpdateState(int iState)
+    {
+        this._iAnimState = iState;
+        this.UpdateState(); 
+    }
 
-        #region Call the function in animation event attack
+    private void UpdateState()
+    {
+        //this._animator.Play(this._iAnimState, 0, 0f);
+        this._animator.PlayInFixedTime(this._iAnimState, 0, 0f);
+    }
+
+    #region Call the function in animation event attack
 
     private void AE_AttackCombo()
     {
-        this.baseCharacter?.I_AtackCombo();
+        this._attackInterface?.I_AN_AtackCombo();
     }
 
     private void AE_AttackEnd()
     {
-        this.baseCharacter?.I_AttackEnd();
+        this._attackInterface?.I_AN_AttackEnd();
     }
-    
+
+    private void AE_CanAttackToRun()
+    {
+        this.bCanAttackToRun = true;
+    }
+
+    private void AE_AttackStopMoving()
+    {
+        this._attackInterface?.I_AN_AttackStopMoving();
+    }
+
     private void AE_TraceStart()
     {
-        this.baseCharacter?.I_TraceStart();
+        this._attackInterface?.I_AN_TraceStart();
     }
 
     private void AE_TraceEnd()
     {
-        this.baseCharacter?.I_TraceEnd();
+        this._attackInterface?.I_AN_TraceEnd();
     }
-    
+
     private void AE_PainEnd()
     {
-        this.baseCharacter?.HandlePainEnd();
+        this.baseCharacter?.AN_PainEnd();
     }
 
     #endregion
+
+
 }

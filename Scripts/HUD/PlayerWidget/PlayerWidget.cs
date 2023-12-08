@@ -23,7 +23,7 @@ public class PlayerWidget : RyoMonoBehaviour
     {
         base.Start();
 
-        this.SetActiveHealthBar_Enemy(false);
+        this.ShowHealthBar_Enemy(false);
     }
 
     protected override void LoadComponents()
@@ -54,7 +54,7 @@ public class PlayerWidget : RyoMonoBehaviour
         this._healthBar_Enemy?.UpdateHealthBar(Health, MaxHealth);
     }
 
-    public void SetActiveHealthBar_Enemy(bool active)
+    public void ShowHealthBar_Enemy(bool active)
     {
         this._healthBar_Enemy?.gameObject.SetActive(active);
     }

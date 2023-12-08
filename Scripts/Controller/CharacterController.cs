@@ -1,42 +1,58 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class CharacterController : RyoMonoBehaviour
+public abstract class CharacterController : RyoMonoBehaviour
 {
     [Header("Character Controller")]
-    [SerializeField] protected BaseCharacter baseCharacter;
-    [SerializeField] protected Vector2 moveInput;
-    public Vector2 MoveInput => moveInput;
-    public BaseCharacter BaseCharacter => baseCharacter;
+    [SerializeField] protected BaseCharacter_Old baseCharacter;
+    [SerializeField] protected float inputValueMove;
+    public float InputValueMove => inputValueMove;
+    public BaseCharacter_Old BaseCharacter => baseCharacter;
+    [SerializeField] public bool bPressingMove => inputValueMove != 0;
 
     protected override void LoadComponents()
     {
         base.LoadComponents();
 
         if (this.baseCharacter == null)
-            this.baseCharacter = GetComponent<BaseCharacter>();
+            this.baseCharacter = GetComponent<BaseCharacter_Old>();
     }
 
-    #region Handle Input
+        #region Handle Input
 
-    protected virtual void HandleMoveInput()
+    protected virtual void PressMove()
     {
-        this.baseCharacter?.HandlePressedMove(this.moveInput);
+        this.baseCharacter?.HandlePressMove(this.inputValueMove);
+    }
+    
+    protected virtual void ReleaseMove()
+    {
+        this.baseCharacter?.HandleReleaseMove();
     }
 
-    protected virtual void HandleJumpInput()
+    protected virtual void PressJump()
     {
         this.baseCharacter?.HandlePressedJump();
     }
-
-    protected virtual void HandleNormalAttackInput()
+    
+    protected virtual void PressSprint()
     {
-        this.baseCharacter?.HandlePressedAttack(EAttackType.Normal);
+        this.baseCharacter?.HandlePressSprint();
+    }
+    
+    protected virtual void ReleaseSprint()
+    {
+        this.baseCharacter?.HandleReleaseSprint();
     }
 
-    protected virtual void HandleStrongAttackInput()
+    protected virtual void PressNormalAttack()
     {
-        this.baseCharacter?.HandlePressedAttack(EAttackType.Strong);
+        this.baseCharacter?.HandlePressNormalAttack();
+    }
+
+    protected virtual void PressStrongAttack()
+    {
+        this.baseCharacter?.HandlePressStrongAttack();
     }
 
     #endregion

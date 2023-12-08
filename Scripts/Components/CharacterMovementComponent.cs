@@ -1,110 +1,132 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
 public class CharacterMovementComponent : CharacterAbstract
 {
     [Header("Character Movement")]
-    [SerializeField] private float _fDefaultSpeed;
-    [SerializeField] private float _fCombatSpeed;
-    [SerializeField] private float _fDefaultJumpHeight;
-    [SerializeField] private float _fAttackJumpHeight;
     [SerializeField] private float _fAccelerationTime;
-    private float _fMovementSpeed;
+    [SerializeField] private bool _bIsAccelerating;  
+    [SerializeField] private bool _bIsJumping;
+    [SerializeField] private bool _bIsMoving => _moveValue != 0;
+    [SerializeField] private float _fJumpRecoveryTime = 0.5f;
     private float _fJumpHeight;
-    private Vector2 _moveVector;
-    private bool _bIsAccelerating;  
+    private float _fMovementSpeed;
+    private float _moveValue;
     private float _fCounter;
-    public bool BPressingMove => _moveVector.x != 0;
+
+    private float _fCounterJump;
+    [SerializeField] private bool _bCanJump;
+    public bool bIsMoving => _bIsMoving;
+    public bool bIsJumping => _bIsJumping;
+    public bool bCanJump => _bCanJump;
+    public bool bIsAccelerating => _bIsAccelerating;
 
     protected override void SetupValues()
     {
         base.SetupValues();
-
-        this._fAccelerationTime = 0.2f;
+        this._bCanJump = true;
+        this._fAccelerationTime = 0.14f;
         this._bIsAccelerating = false;
-        this._fDefaultSpeed = this.baseCharacter.CharacterSO.FDefaultSpeed;
-        this._fCombatSpeed = this.baseCharacter.CharacterSO.FCombatSpeed;
-        this._fDefaultJumpHeight = this.baseCharacter.CharacterSO.FDefaultJumpHeight;
-        this._fAttackJumpHeight = this.baseCharacter.CharacterSO.FAttackJumpHeight;
+        this._bIsJumping = false;
+        this._fMovementSpeed = this.baseCharacter.CharacterSO.DefaultSpeed;
+        this._fJumpHeight = this.baseCharacter.CharacterSO.JumpHeight;
     }
 
     private void FixedUpdate()
     {
-        if (this._moveVector.x == 0) return;
+        if (this._moveValue == 0) return;
 
         this.AccelerationProcess();
 
         this.Movement();
     }
 
-    public void RequestMove(Vector2 moveVector, bool bIsAccelerating = true)
+    private void Update()
     {
-        if (this.baseCharacter.CharacterMesh.BIsAttacking == true 
-            && moveVector.x != this._moveVector.x 
-            && moveVector.x != 0) return;
+        if (this._moveValue == 0) return;
 
-        this._moveVector = moveVector;
+        if (this.baseCharacter.CharacterCapsule.bIsOnWall)
+            this.RequestIdle();
 
-        if (this._moveVector.x != 0)
-        {
-            this._fCounter = this._fAccelerationTime;
-            this._bIsAccelerating = bIsAccelerating;
-        }
     }
 
+    public void RequestIdle()
+    {
+        this._moveValue = 0;
+        this.Idle();
+    }
+
+    private void Idle()
+    {
+        this.baseCharacter.Rigidbody.velocity = new Vector2(0, this.baseCharacter.Rigidbody.velocity.y);
+    }
+
+    public void RequestMove(float moveValue, bool bIsAccelerating = true)
+    {
+        this._moveValue = moveValue;
+        this._bIsAccelerating = bIsAccelerating;
+
+        if (this._bIsAccelerating)
+            this._fCounter = this._fAccelerationTime;
+        else
+            this.baseCharacter.CharacterMesh.RequestMigrationUpdate(this._moveValue);
+
+    }
+     
     private void AccelerationProcess()
     {
-        if (this._bIsAccelerating == false || this.baseCharacter.CharacterMesh.BIsJumping == true
-            || this.baseCharacter.CharacterMesh.BIsAttacking == true)
-            return;
-        else
+        if (this._bIsAccelerating)
         {
             if (this._fCounter > 0)
             {
-                this._fMovementSpeed = this._fDefaultSpeed * this._fCounter;
+                this._fMovementSpeed = 0;
                 this._fCounter -= Time.deltaTime;
             }
             else
             {
-                if (this._moveVector.x != 0)
+                if (this._moveValue != 0)
                 {
-                    this.baseCharacter.CharacterMesh.RequestUpdateState(this.baseCharacter.CharacterSO.Anim_Run);
-                    this._fMovementSpeed = this._fDefaultSpeed;
                     this._bIsAccelerating = false;
+                    this._fMovementSpeed = this.baseCharacter.CharacterSO.DefaultSpeed;
+                    this.baseCharacter.CharacterMesh.RequestMigrationUpdate(this._moveValue);
                 }
-
             }
         }
     }
 
     private void Movement()
     {
-        this.baseCharacter.Rigidbody.velocity = new Vector2(this._moveVector.x * this._fMovementSpeed, this.baseCharacter.Rigidbody.velocity.y);
+        this.baseCharacter.Rigidbody.velocity = new Vector2(this._moveValue * this._fMovementSpeed, this.baseCharacter.Rigidbody.velocity.y);
     }
 
     public void RequestJump()
     {
-        this.UpdateJumpHeight();
-
+        this._bCanJump = false;
+        this._bIsJumping = true;
         this.Jump();
     }
-
-    private void UpdateJumpHeight()
-    {
-        if (this.baseCharacter.CharacterMesh.BIsAttacking == true)
-            this._fJumpHeight = this._fAttackJumpHeight;
-        else
-            this._fJumpHeight = this._fDefaultJumpHeight;
-    }
-
-    public void ChangeMovementSpeed(float movvementSpeed)
-    {
-            this._fMovementSpeed = movvementSpeed;
-    }
-
+    
     private void Jump()
     {
         this.baseCharacter.Rigidbody.velocity = new Vector2 (this.baseCharacter.Rigidbody.velocity.x, this._fJumpHeight);
+    }
+
+    public void AN_JumpEnd()
+    {
+        this._bIsJumping = false;
+        StartCoroutine(RegenJump());
+    }
+
+    private IEnumerator RegenJump()
+    {
+        yield return new WaitForSecondsRealtime(this._fJumpRecoveryTime);
+        this._bCanJump = true;
+    }
+
+    public void ChangeMaxMovementSpeed(float movementSpeed)
+    {
+        this._fMovementSpeed = movementSpeed;
     }
 
 }

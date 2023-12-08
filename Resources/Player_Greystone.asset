@@ -12,14 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88db62c3a2f9d114f80a3f6e45af5341, type: 3}
   m_Name: Player_Greystone
   m_EditorClassIdentifier: 
-  FDefaultSpeed: 11
-  FCombatSpeed: 6
-  FDefaultJumpHeight: 40
-  FAttackJumpHeight: 35
-  FDamage: 20
-  FHealth: 70
-  FMaxHealth: 100
-  FSightRadius: 7
+  DefaultSpeed: 6
+  CombatSpeed: 4
+  PatrolSpeed: 3.5
+  SprintSpeed: 8
+  JumpHeight: 22
+  Damage: 20
+  SightRadius: 7
+  Health: 100
+  MaxHealth: 100
   PainAudio: {fileID: 8300000, guid: d9d5a13745ef88b439002b6d603abee9, type: 3}
   DeathAudio: {fileID: 8300000, guid: d19373d368c29a74da5c8dc32b059eae, type: 3}
   WeaponTrailAudio: {fileID: 8300000, guid: e4e719215600c514899434787ff3f0a3, type: 3}

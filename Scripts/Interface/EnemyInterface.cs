@@ -4,7 +4,7 @@ using UnityEngine;
 
 public interface IEnemyInterface
 {
-    public abstract void I_HandleSeePlayer(BaseCharacter character);
+    public abstract void I_HandleSeePlayer(BaseCharacter_Old character);
 
 
 }
